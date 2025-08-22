@@ -287,7 +287,7 @@ def do_run_migrations(connection: Connection) -> None:
 
 
 async def run_async_migrations() -> None:
-    await dl.init(echo=True, pool_class=sa.pool.NullPool)
+    await dl.init(echo=True, poolclass=sa.pool.NullPool)
 
     async with grammdb.connection_ctx(dl.database()) as conn:
         await conn.run_sync(do_run_migrations)
@@ -311,7 +311,7 @@ from my_app import dl
 from my_app.dl import where
 
 async def prune():
-  await dl.init(pool_class=sa.pool.NullPool)
+  await dl.init(poolclass=sa.pool.NullPool)
   async with grammdb.connection_ctx(dl.database()) as conn:
     last_week = datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=7)
     stmt = grammdb.delete(dl.schema.MyTable, where.created_before(last_week.timestamp()))
