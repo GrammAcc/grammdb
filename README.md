@@ -186,7 +186,7 @@ def from_my_data() -> sa.Select:
     # as the from clause in a query.
     aliases = {
         "my_table": [v.label("my_table_" + str(k)) for k, v in MyTable.c.items()],
-        "my_relation": [v.label("my_relation_" + str(k)) for k, v in MyTable.c.items()],
+        "my_relation": [v.label("my_relation_" + str(k)) for k, v in MyRelation.c.items()],
     }
 
     target = sa.outerjoin(MyTable, MyRelation, MyTable.c.my_relation_id == MyRelation.c.id)
