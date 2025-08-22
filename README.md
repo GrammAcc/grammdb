@@ -173,11 +173,11 @@ def where_has_relation() -> WhereFunc:
 def where_created_before(dt: datetime.datetime, table_name: str | None = None) -> WhereFunc:
     if table_name is None:
         def _(selectable):
-            return selectable.where(sa.column("created_at") > dt.timestamp())
+            return selectable.where(sa.column("created_at") < dt.timestamp())
         return _
     else:
         def _(selectable):
-            return selectable.where(sa.column(f"{table_name}_created_at") > dt.timestamp())
+            return selectable.where(sa.column(f"{table_name}_created_at") < dt.timestamp())
         return _
 
 
