@@ -45,8 +45,8 @@ dependencies = ["black", "flake8", "isort", "mypy", "pdoc"]
 typecheck = "mypy -p grammdb {args}"
 format = ["isort --atomic .", "black ."]
 lint = "flake8 src test docs"
-"docs.build" = "pdoc 'grammdb' --docformat='google' --output-directory='docs/site'"
-"docs.serve" = "python docs/serve.py"
+"docs.build" = "pdoc 'grammdb' --docformat='google' --output-directory='docs'"
+"docs.serve" = "python documentation/serve.py"
 "docs.test" = "hatch run test:docs"
 
 "test.unit" = "hatch run test:unit"
@@ -95,7 +95,7 @@ python = ["3.12", "3.13"]
     "docker stop test-postgres-db",
 ]
 
-"docs" = "python docs/run_doctests.py"
+"docs" = "python documentation/run_doctests.py"
 
 "cov" = [
     "docker compose up -d",
