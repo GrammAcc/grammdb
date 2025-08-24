@@ -27,10 +27,20 @@ class CheckConstraintError(ConstraintError):
     pass
 
 
+class NotNullConstraintError(ConstraintError):
+    """Represents a not null constraint violation."""
+
+    pass
+
+
 @contextlib.contextmanager
 def constraint_error():
-    """Context manager that will catch and parse a sqlalchemy.exc.IntegrityError
+    """Context manager that will catch and parse a `sqlalchemy.exc.IntegrityError`
     and raise one of the specific constraint errors from this module in its place.
+
+    SQLAlchemy raises `IntegrityError` on any constraint violation, but sometimes it's
+    helpful to know exactly which constraint was violated in application code and handle
+    only that specific error.
 
     Note:
         This is only tested on sqlite3 and postgresql. This function relies on the
@@ -74,5 +84,7 @@ def constraint_error():
             raise CheckConstraintError(err_str) from e
         elif "foreign key constraint" in comp_str:
             raise ForeignKeyConstraintError(err_str) from e
+        elif "not null constraint" in comp_str or "not-null constraint" in comp_str:
+            raise NotNullConstraintError(err_str) from e
         else:
             raise e

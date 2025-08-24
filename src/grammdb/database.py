@@ -114,7 +114,7 @@ class _DatabaseFacade:
     def get_engine(self) -> AsyncEngine:
         assert (
             self._ENGINE is not None
-        ), "No engine found. Did you forget to call initialize on this database?"
+        ), "No engine found. Did you forget to call init_db() on this database?"
         return self._ENGINE
 
     def set_engine(self, value: AsyncEngine) -> None:

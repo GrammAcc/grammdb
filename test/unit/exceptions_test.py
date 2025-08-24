@@ -15,6 +15,7 @@ class MockSchema:
         _metadata,
         sa.Column("id", sa.Integer, primary_key=True),
         sa.Column("unique_col", sa.Text, unique=True),
+        sa.Column("not_null_col", sa.Text, nullable=False, default="not_null_value"),
         sa.Column("check_col", sa.Text, sa.CheckConstraint("check_col <> 'invalid'")),
     )
     Primary = sa.Table(
@@ -66,3 +67,14 @@ async def test_foreign_key_constraint_error(fixt_conn_string):
         with pytest.raises(grammdb.exceptions.ForeignKeyConstraintError):
             with grammdb.exceptions.constraint_error():
                 await conn.execute(grammdb.insert(into=schema.Primary, **vals))
+
+
+async def test_not_null_constraint_error(fixt_conn_string):
+    schema = MockSchema()
+    database = grammdb.db_factory(schema)
+    await grammdb.init_db(database(), fixt_conn_string, drop_tables=True)
+    vals = {"id": 1, "not_null_col": None, "unique_col": "unique_value", "check_col": "valid"}
+    async with grammdb.connection_ctx(database()) as conn:
+        with pytest.raises(grammdb.exceptions.NotNullConstraintError):
+            with grammdb.exceptions.constraint_error():
+                await conn.execute(grammdb.insert(into=schema.Lone, **vals))
