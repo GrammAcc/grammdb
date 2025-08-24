@@ -55,6 +55,12 @@
 
             </li>
             <li>
+                    <a class="class" href="#NotNullConstraintError">NotNullConstraintError</a>
+                            <ul class="memberlist">
+                </ul>
+
+            </li>
+            <li>
                     <a class="function" href="#constraint_error">constraint_error</a>
             </li>
     </ul>
@@ -107,55 +113,67 @@
 </span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a>    <span class="k">pass</span>
 </span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a>
 </span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a>
-</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
-</span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a><span class="k">def</span><span class="w"> </span><span class="nf">constraint_error</span><span class="p">():</span>
-</span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Context manager that will catch and parse a sqlalchemy.exc.IntegrityError</span>
-</span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a><span class="sd">    and raise one of the specific constraint errors from this module in its place.</span>
+</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a><span class="k">class</span><span class="w"> </span><span class="nc">NotNullConstraintError</span><span class="p">(</span><span class="n">ConstraintError</span><span class="p">):</span>
+</span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a not null constraint violation.&quot;&quot;&quot;</span>
+</span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a>
+</span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a>    <span class="k">pass</span>
 </span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a>
-</span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a><span class="sd">    Note:</span>
-</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a><span class="sd">        This is only tested on sqlite3 and postgresql. This function relies on the</span>
-</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a><span class="sd">        string message provided in the sqlalchemy error to determine which constraint</span>
-</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a><span class="sd">        was violated, and this may not be reliable on all backends.</span>
-</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a>
-</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a><span class="sd">    Example:</span>
-</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a><span class="sd">        ```pycon</span>
-</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a><span class="sd">        &gt;&gt;&gt; from grammdb.exceptions import constraint_error, UniqueConstraintError</span>
-</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a><span class="sd">        &gt;&gt;&gt; def generate_xkcd_random_number():</span>
-</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a><span class="sd">        ...     # Chosen by fair dice roll.</span>
-</span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a><span class="sd">        ...     # Guaranteed to be random.</span>
-</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a><span class="sd">        ...     return 4</span>
-</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a><span class="sd">        &gt;&gt;&gt; async def try_insert(rand_num):</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a><span class="sd">        ...     try:</span>
-</span><span id="L-49"><a href="#L-49"><span class="linenos">49</span></a><span class="sd">        ...         async with grammdb.connection_ctx(database()) as conn:</span>
-</span><span id="L-50"><a href="#L-50"><span class="linenos">50</span></a><span class="sd">        ...             with constraint_error():</span>
-</span><span id="L-51"><a href="#L-51"><span class="linenos">51</span></a><span class="sd">        ...                 await conn.execute(grammdb.insert(into=schema.MyTable, num=rand_num))</span>
-</span><span id="L-52"><a href="#L-52"><span class="linenos">52</span></a><span class="sd">        ...                 await conn.commit()</span>
-</span><span id="L-53"><a href="#L-53"><span class="linenos">53</span></a><span class="sd">        ...     except UniqueConstraintError:</span>
-</span><span id="L-54"><a href="#L-54"><span class="linenos">54</span></a><span class="sd">        ...         print(&quot;Random number collision encountered. Trying a new random number...&quot;)</span>
-</span><span id="L-55"><a href="#L-55"><span class="linenos">55</span></a><span class="sd">        ...         await try_insert(generate_xkcd_random_number())</span>
-</span><span id="L-56"><a href="#L-56"><span class="linenos">56</span></a><span class="sd">        ...     except Exception as e:</span>
-</span><span id="L-57"><a href="#L-57"><span class="linenos">57</span></a><span class="sd">        ...         print(f&quot;Unknown error occurred: {e}&quot;)</span>
-</span><span id="L-58"><a href="#L-58"><span class="linenos">58</span></a><span class="sd">        &gt;&gt;&gt; async def ex():</span>
-</span><span id="L-59"><a href="#L-59"><span class="linenos">59</span></a><span class="sd">        ...     await grammdb.init_db(database(), &quot;sqlite+aiosqlite://&quot;)</span>
-</span><span id="L-60"><a href="#L-60"><span class="linenos">60</span></a><span class="sd">        ...     await try_insert(generate_xkcd_random_number())</span>
-</span><span id="L-61"><a href="#L-61"><span class="linenos">61</span></a><span class="sd">        &gt;&gt;&gt; asyncio.run(ex())</span>
-</span><span id="L-62"><a href="#L-62"><span class="linenos">62</span></a>
-</span><span id="L-63"><a href="#L-63"><span class="linenos">63</span></a><span class="sd">        ```</span>
-</span><span id="L-64"><a href="#L-64"><span class="linenos">64</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-65"><a href="#L-65"><span class="linenos">65</span></a>
-</span><span id="L-66"><a href="#L-66"><span class="linenos">66</span></a>    <span class="k">try</span><span class="p">:</span>
-</span><span id="L-67"><a href="#L-67"><span class="linenos">67</span></a>        <span class="k">yield</span> <span class="kc">None</span>
-</span><span id="L-68"><a href="#L-68"><span class="linenos">68</span></a>    <span class="k">except</span> <span class="n">IntegrityError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="L-69"><a href="#L-69"><span class="linenos">69</span></a>        <span class="n">err_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-</span><span id="L-70"><a href="#L-70"><span class="linenos">70</span></a>        <span class="n">comp_str</span> <span class="o">=</span> <span class="n">err_str</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-</span><span id="L-71"><a href="#L-71"><span class="linenos">71</span></a>        <span class="k">if</span> <span class="s2">&quot;unique constraint&quot;</span> <span class="ow">in</span> <span class="n">comp_str</span><span class="p">:</span>
-</span><span id="L-72"><a href="#L-72"><span class="linenos">72</span></a>            <span class="k">raise</span> <span class="n">UniqueConstraintError</span><span class="p">(</span><span class="n">err_str</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
-</span><span id="L-73"><a href="#L-73"><span class="linenos">73</span></a>        <span class="k">elif</span> <span class="s2">&quot;check constraint&quot;</span> <span class="ow">in</span> <span class="n">comp_str</span><span class="p">:</span>
-</span><span id="L-74"><a href="#L-74"><span class="linenos">74</span></a>            <span class="k">raise</span> <span class="n">CheckConstraintError</span><span class="p">(</span><span class="n">err_str</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
-</span><span id="L-75"><a href="#L-75"><span class="linenos">75</span></a>        <span class="k">elif</span> <span class="s2">&quot;foreign key constraint&quot;</span> <span class="ow">in</span> <span class="n">comp_str</span><span class="p">:</span>
-</span><span id="L-76"><a href="#L-76"><span class="linenos">76</span></a>            <span class="k">raise</span> <span class="n">ForeignKeyConstraintError</span><span class="p">(</span><span class="n">err_str</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
-</span><span id="L-77"><a href="#L-77"><span class="linenos">77</span></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="L-78"><a href="#L-78"><span class="linenos">78</span></a>            <span class="k">raise</span> <span class="n">e</span>
+</span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a>
+</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a><span class="k">def</span><span class="w"> </span><span class="nf">constraint_error</span><span class="p">():</span>
+</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Context manager that will catch and parse a `sqlalchemy.exc.IntegrityError`</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a><span class="sd">    and raise one of the specific constraint errors from this module in its place.</span>
+</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a>
+</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a><span class="sd">    SQLAlchemy raises `IntegrityError` on any constraint violation, but sometimes it&#39;s</span>
+</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a><span class="sd">    helpful to know exactly which constraint was violated in application code and handle</span>
+</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a><span class="sd">    only that specific error.</span>
+</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a>
+</span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a><span class="sd">    Note:</span>
+</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a><span class="sd">        This is only tested on sqlite3 and postgresql. This function relies on the</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a><span class="sd">        string message provided in the sqlalchemy error to determine which constraint</span>
+</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a><span class="sd">        was violated, and this may not be reliable on all backends.</span>
+</span><span id="L-49"><a href="#L-49"><span class="linenos">49</span></a>
+</span><span id="L-50"><a href="#L-50"><span class="linenos">50</span></a><span class="sd">    Example:</span>
+</span><span id="L-51"><a href="#L-51"><span class="linenos">51</span></a><span class="sd">        ```pycon</span>
+</span><span id="L-52"><a href="#L-52"><span class="linenos">52</span></a><span class="sd">        &gt;&gt;&gt; from grammdb.exceptions import constraint_error, UniqueConstraintError</span>
+</span><span id="L-53"><a href="#L-53"><span class="linenos">53</span></a><span class="sd">        &gt;&gt;&gt; def generate_xkcd_random_number():</span>
+</span><span id="L-54"><a href="#L-54"><span class="linenos">54</span></a><span class="sd">        ...     # Chosen by fair dice roll.</span>
+</span><span id="L-55"><a href="#L-55"><span class="linenos">55</span></a><span class="sd">        ...     # Guaranteed to be random.</span>
+</span><span id="L-56"><a href="#L-56"><span class="linenos">56</span></a><span class="sd">        ...     return 4</span>
+</span><span id="L-57"><a href="#L-57"><span class="linenos">57</span></a><span class="sd">        &gt;&gt;&gt; async def try_insert(rand_num):</span>
+</span><span id="L-58"><a href="#L-58"><span class="linenos">58</span></a><span class="sd">        ...     try:</span>
+</span><span id="L-59"><a href="#L-59"><span class="linenos">59</span></a><span class="sd">        ...         async with grammdb.connection_ctx(database()) as conn:</span>
+</span><span id="L-60"><a href="#L-60"><span class="linenos">60</span></a><span class="sd">        ...             with constraint_error():</span>
+</span><span id="L-61"><a href="#L-61"><span class="linenos">61</span></a><span class="sd">        ...                 await conn.execute(grammdb.insert(into=schema.MyTable, num=rand_num))</span>
+</span><span id="L-62"><a href="#L-62"><span class="linenos">62</span></a><span class="sd">        ...                 await conn.commit()</span>
+</span><span id="L-63"><a href="#L-63"><span class="linenos">63</span></a><span class="sd">        ...     except UniqueConstraintError:</span>
+</span><span id="L-64"><a href="#L-64"><span class="linenos">64</span></a><span class="sd">        ...         print(&quot;Random number collision encountered. Trying a new random number...&quot;)</span>
+</span><span id="L-65"><a href="#L-65"><span class="linenos">65</span></a><span class="sd">        ...         await try_insert(generate_xkcd_random_number())</span>
+</span><span id="L-66"><a href="#L-66"><span class="linenos">66</span></a><span class="sd">        ...     except Exception as e:</span>
+</span><span id="L-67"><a href="#L-67"><span class="linenos">67</span></a><span class="sd">        ...         print(f&quot;Unknown error occurred: {e}&quot;)</span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos">68</span></a><span class="sd">        &gt;&gt;&gt; async def ex():</span>
+</span><span id="L-69"><a href="#L-69"><span class="linenos">69</span></a><span class="sd">        ...     await grammdb.init_db(database(), &quot;sqlite+aiosqlite://&quot;)</span>
+</span><span id="L-70"><a href="#L-70"><span class="linenos">70</span></a><span class="sd">        ...     await try_insert(generate_xkcd_random_number())</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos">71</span></a><span class="sd">        &gt;&gt;&gt; asyncio.run(ex())</span>
+</span><span id="L-72"><a href="#L-72"><span class="linenos">72</span></a>
+</span><span id="L-73"><a href="#L-73"><span class="linenos">73</span></a><span class="sd">        ```</span>
+</span><span id="L-74"><a href="#L-74"><span class="linenos">74</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-75"><a href="#L-75"><span class="linenos">75</span></a>
+</span><span id="L-76"><a href="#L-76"><span class="linenos">76</span></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="L-77"><a href="#L-77"><span class="linenos">77</span></a>        <span class="k">yield</span> <span class="kc">None</span>
+</span><span id="L-78"><a href="#L-78"><span class="linenos">78</span></a>    <span class="k">except</span> <span class="n">IntegrityError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="L-79"><a href="#L-79"><span class="linenos">79</span></a>        <span class="n">err_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</span><span id="L-80"><a href="#L-80"><span class="linenos">80</span></a>        <span class="n">comp_str</span> <span class="o">=</span> <span class="n">err_str</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</span><span id="L-81"><a href="#L-81"><span class="linenos">81</span></a>        <span class="k">if</span> <span class="s2">&quot;unique constraint&quot;</span> <span class="ow">in</span> <span class="n">comp_str</span><span class="p">:</span>
+</span><span id="L-82"><a href="#L-82"><span class="linenos">82</span></a>            <span class="k">raise</span> <span class="n">UniqueConstraintError</span><span class="p">(</span><span class="n">err_str</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+</span><span id="L-83"><a href="#L-83"><span class="linenos">83</span></a>        <span class="k">elif</span> <span class="s2">&quot;check constraint&quot;</span> <span class="ow">in</span> <span class="n">comp_str</span><span class="p">:</span>
+</span><span id="L-84"><a href="#L-84"><span class="linenos">84</span></a>            <span class="k">raise</span> <span class="n">CheckConstraintError</span><span class="p">(</span><span class="n">err_str</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+</span><span id="L-85"><a href="#L-85"><span class="linenos">85</span></a>        <span class="k">elif</span> <span class="s2">&quot;foreign key constraint&quot;</span> <span class="ow">in</span> <span class="n">comp_str</span><span class="p">:</span>
+</span><span id="L-86"><a href="#L-86"><span class="linenos">86</span></a>            <span class="k">raise</span> <span class="n">ForeignKeyConstraintError</span><span class="p">(</span><span class="n">err_str</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+</span><span id="L-87"><a href="#L-87"><span class="linenos">87</span></a>        <span class="k">elif</span> <span class="s2">&quot;not null constraint&quot;</span> <span class="ow">in</span> <span class="n">comp_str</span> <span class="ow">or</span> <span class="s2">&quot;not-null constraint&quot;</span> <span class="ow">in</span> <span class="n">comp_str</span><span class="p">:</span>
+</span><span id="L-88"><a href="#L-88"><span class="linenos">88</span></a>            <span class="k">raise</span> <span class="n">NotNullConstraintError</span><span class="p">(</span><span class="n">err_str</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+</span><span id="L-89"><a href="#L-89"><span class="linenos">89</span></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="L-90"><a href="#L-90"><span class="linenos">90</span></a>            <span class="k">raise</span> <span class="n">e</span>
 </span></pre></div>
 
 
@@ -252,6 +270,29 @@
 
 
                 </section>
+                <section id="NotNullConstraintError">
+                            <input id="NotNullConstraintError-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">NotNullConstraintError</span><wbr>(<span class="base"><a href="#ConstraintError">ConstraintError</a></span>):
+
+                <label class="view-source-button" for="NotNullConstraintError-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#NotNullConstraintError"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="NotNullConstraintError-31"><a href="#NotNullConstraintError-31"><span class="linenos">31</span></a><span class="k">class</span><span class="w"> </span><span class="nc">NotNullConstraintError</span><span class="p">(</span><span class="n">ConstraintError</span><span class="p">):</span>
+</span><span id="NotNullConstraintError-32"><a href="#NotNullConstraintError-32"><span class="linenos">32</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a not null constraint violation.&quot;&quot;&quot;</span>
+</span><span id="NotNullConstraintError-33"><a href="#NotNullConstraintError-33"><span class="linenos">33</span></a>
+</span><span id="NotNullConstraintError-34"><a href="#NotNullConstraintError-34"><span class="linenos">34</span></a>    <span class="k">pass</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>Represents a not null constraint violation.</p>
+</div>
+
+
+                </section>
                 <section id="constraint_error">
                             <input id="constraint_error-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
@@ -264,60 +305,70 @@
 
     </div>
     <a class="headerlink" href="#constraint_error"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="constraint_error-31"><a href="#constraint_error-31"><span class="linenos">31</span></a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
-</span><span id="constraint_error-32"><a href="#constraint_error-32"><span class="linenos">32</span></a><span class="k">def</span><span class="w"> </span><span class="nf">constraint_error</span><span class="p">():</span>
-</span><span id="constraint_error-33"><a href="#constraint_error-33"><span class="linenos">33</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Context manager that will catch and parse a sqlalchemy.exc.IntegrityError</span>
-</span><span id="constraint_error-34"><a href="#constraint_error-34"><span class="linenos">34</span></a><span class="sd">    and raise one of the specific constraint errors from this module in its place.</span>
-</span><span id="constraint_error-35"><a href="#constraint_error-35"><span class="linenos">35</span></a>
-</span><span id="constraint_error-36"><a href="#constraint_error-36"><span class="linenos">36</span></a><span class="sd">    Note:</span>
-</span><span id="constraint_error-37"><a href="#constraint_error-37"><span class="linenos">37</span></a><span class="sd">        This is only tested on sqlite3 and postgresql. This function relies on the</span>
-</span><span id="constraint_error-38"><a href="#constraint_error-38"><span class="linenos">38</span></a><span class="sd">        string message provided in the sqlalchemy error to determine which constraint</span>
-</span><span id="constraint_error-39"><a href="#constraint_error-39"><span class="linenos">39</span></a><span class="sd">        was violated, and this may not be reliable on all backends.</span>
-</span><span id="constraint_error-40"><a href="#constraint_error-40"><span class="linenos">40</span></a>
-</span><span id="constraint_error-41"><a href="#constraint_error-41"><span class="linenos">41</span></a><span class="sd">    Example:</span>
-</span><span id="constraint_error-42"><a href="#constraint_error-42"><span class="linenos">42</span></a><span class="sd">        ```pycon</span>
-</span><span id="constraint_error-43"><a href="#constraint_error-43"><span class="linenos">43</span></a><span class="sd">        &gt;&gt;&gt; from grammdb.exceptions import constraint_error, UniqueConstraintError</span>
-</span><span id="constraint_error-44"><a href="#constraint_error-44"><span class="linenos">44</span></a><span class="sd">        &gt;&gt;&gt; def generate_xkcd_random_number():</span>
-</span><span id="constraint_error-45"><a href="#constraint_error-45"><span class="linenos">45</span></a><span class="sd">        ...     # Chosen by fair dice roll.</span>
-</span><span id="constraint_error-46"><a href="#constraint_error-46"><span class="linenos">46</span></a><span class="sd">        ...     # Guaranteed to be random.</span>
-</span><span id="constraint_error-47"><a href="#constraint_error-47"><span class="linenos">47</span></a><span class="sd">        ...     return 4</span>
-</span><span id="constraint_error-48"><a href="#constraint_error-48"><span class="linenos">48</span></a><span class="sd">        &gt;&gt;&gt; async def try_insert(rand_num):</span>
-</span><span id="constraint_error-49"><a href="#constraint_error-49"><span class="linenos">49</span></a><span class="sd">        ...     try:</span>
-</span><span id="constraint_error-50"><a href="#constraint_error-50"><span class="linenos">50</span></a><span class="sd">        ...         async with grammdb.connection_ctx(database()) as conn:</span>
-</span><span id="constraint_error-51"><a href="#constraint_error-51"><span class="linenos">51</span></a><span class="sd">        ...             with constraint_error():</span>
-</span><span id="constraint_error-52"><a href="#constraint_error-52"><span class="linenos">52</span></a><span class="sd">        ...                 await conn.execute(grammdb.insert(into=schema.MyTable, num=rand_num))</span>
-</span><span id="constraint_error-53"><a href="#constraint_error-53"><span class="linenos">53</span></a><span class="sd">        ...                 await conn.commit()</span>
-</span><span id="constraint_error-54"><a href="#constraint_error-54"><span class="linenos">54</span></a><span class="sd">        ...     except UniqueConstraintError:</span>
-</span><span id="constraint_error-55"><a href="#constraint_error-55"><span class="linenos">55</span></a><span class="sd">        ...         print(&quot;Random number collision encountered. Trying a new random number...&quot;)</span>
-</span><span id="constraint_error-56"><a href="#constraint_error-56"><span class="linenos">56</span></a><span class="sd">        ...         await try_insert(generate_xkcd_random_number())</span>
-</span><span id="constraint_error-57"><a href="#constraint_error-57"><span class="linenos">57</span></a><span class="sd">        ...     except Exception as e:</span>
-</span><span id="constraint_error-58"><a href="#constraint_error-58"><span class="linenos">58</span></a><span class="sd">        ...         print(f&quot;Unknown error occurred: {e}&quot;)</span>
-</span><span id="constraint_error-59"><a href="#constraint_error-59"><span class="linenos">59</span></a><span class="sd">        &gt;&gt;&gt; async def ex():</span>
-</span><span id="constraint_error-60"><a href="#constraint_error-60"><span class="linenos">60</span></a><span class="sd">        ...     await grammdb.init_db(database(), &quot;sqlite+aiosqlite://&quot;)</span>
-</span><span id="constraint_error-61"><a href="#constraint_error-61"><span class="linenos">61</span></a><span class="sd">        ...     await try_insert(generate_xkcd_random_number())</span>
-</span><span id="constraint_error-62"><a href="#constraint_error-62"><span class="linenos">62</span></a><span class="sd">        &gt;&gt;&gt; asyncio.run(ex())</span>
-</span><span id="constraint_error-63"><a href="#constraint_error-63"><span class="linenos">63</span></a>
-</span><span id="constraint_error-64"><a href="#constraint_error-64"><span class="linenos">64</span></a><span class="sd">        ```</span>
-</span><span id="constraint_error-65"><a href="#constraint_error-65"><span class="linenos">65</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="constraint_error-66"><a href="#constraint_error-66"><span class="linenos">66</span></a>
-</span><span id="constraint_error-67"><a href="#constraint_error-67"><span class="linenos">67</span></a>    <span class="k">try</span><span class="p">:</span>
-</span><span id="constraint_error-68"><a href="#constraint_error-68"><span class="linenos">68</span></a>        <span class="k">yield</span> <span class="kc">None</span>
-</span><span id="constraint_error-69"><a href="#constraint_error-69"><span class="linenos">69</span></a>    <span class="k">except</span> <span class="n">IntegrityError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="constraint_error-70"><a href="#constraint_error-70"><span class="linenos">70</span></a>        <span class="n">err_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-</span><span id="constraint_error-71"><a href="#constraint_error-71"><span class="linenos">71</span></a>        <span class="n">comp_str</span> <span class="o">=</span> <span class="n">err_str</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-</span><span id="constraint_error-72"><a href="#constraint_error-72"><span class="linenos">72</span></a>        <span class="k">if</span> <span class="s2">&quot;unique constraint&quot;</span> <span class="ow">in</span> <span class="n">comp_str</span><span class="p">:</span>
-</span><span id="constraint_error-73"><a href="#constraint_error-73"><span class="linenos">73</span></a>            <span class="k">raise</span> <span class="n">UniqueConstraintError</span><span class="p">(</span><span class="n">err_str</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
-</span><span id="constraint_error-74"><a href="#constraint_error-74"><span class="linenos">74</span></a>        <span class="k">elif</span> <span class="s2">&quot;check constraint&quot;</span> <span class="ow">in</span> <span class="n">comp_str</span><span class="p">:</span>
-</span><span id="constraint_error-75"><a href="#constraint_error-75"><span class="linenos">75</span></a>            <span class="k">raise</span> <span class="n">CheckConstraintError</span><span class="p">(</span><span class="n">err_str</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
-</span><span id="constraint_error-76"><a href="#constraint_error-76"><span class="linenos">76</span></a>        <span class="k">elif</span> <span class="s2">&quot;foreign key constraint&quot;</span> <span class="ow">in</span> <span class="n">comp_str</span><span class="p">:</span>
-</span><span id="constraint_error-77"><a href="#constraint_error-77"><span class="linenos">77</span></a>            <span class="k">raise</span> <span class="n">ForeignKeyConstraintError</span><span class="p">(</span><span class="n">err_str</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
-</span><span id="constraint_error-78"><a href="#constraint_error-78"><span class="linenos">78</span></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="constraint_error-79"><a href="#constraint_error-79"><span class="linenos">79</span></a>            <span class="k">raise</span> <span class="n">e</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="constraint_error-37"><a href="#constraint_error-37"><span class="linenos">37</span></a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+</span><span id="constraint_error-38"><a href="#constraint_error-38"><span class="linenos">38</span></a><span class="k">def</span><span class="w"> </span><span class="nf">constraint_error</span><span class="p">():</span>
+</span><span id="constraint_error-39"><a href="#constraint_error-39"><span class="linenos">39</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Context manager that will catch and parse a `sqlalchemy.exc.IntegrityError`</span>
+</span><span id="constraint_error-40"><a href="#constraint_error-40"><span class="linenos">40</span></a><span class="sd">    and raise one of the specific constraint errors from this module in its place.</span>
+</span><span id="constraint_error-41"><a href="#constraint_error-41"><span class="linenos">41</span></a>
+</span><span id="constraint_error-42"><a href="#constraint_error-42"><span class="linenos">42</span></a><span class="sd">    SQLAlchemy raises `IntegrityError` on any constraint violation, but sometimes it&#39;s</span>
+</span><span id="constraint_error-43"><a href="#constraint_error-43"><span class="linenos">43</span></a><span class="sd">    helpful to know exactly which constraint was violated in application code and handle</span>
+</span><span id="constraint_error-44"><a href="#constraint_error-44"><span class="linenos">44</span></a><span class="sd">    only that specific error.</span>
+</span><span id="constraint_error-45"><a href="#constraint_error-45"><span class="linenos">45</span></a>
+</span><span id="constraint_error-46"><a href="#constraint_error-46"><span class="linenos">46</span></a><span class="sd">    Note:</span>
+</span><span id="constraint_error-47"><a href="#constraint_error-47"><span class="linenos">47</span></a><span class="sd">        This is only tested on sqlite3 and postgresql. This function relies on the</span>
+</span><span id="constraint_error-48"><a href="#constraint_error-48"><span class="linenos">48</span></a><span class="sd">        string message provided in the sqlalchemy error to determine which constraint</span>
+</span><span id="constraint_error-49"><a href="#constraint_error-49"><span class="linenos">49</span></a><span class="sd">        was violated, and this may not be reliable on all backends.</span>
+</span><span id="constraint_error-50"><a href="#constraint_error-50"><span class="linenos">50</span></a>
+</span><span id="constraint_error-51"><a href="#constraint_error-51"><span class="linenos">51</span></a><span class="sd">    Example:</span>
+</span><span id="constraint_error-52"><a href="#constraint_error-52"><span class="linenos">52</span></a><span class="sd">        ```pycon</span>
+</span><span id="constraint_error-53"><a href="#constraint_error-53"><span class="linenos">53</span></a><span class="sd">        &gt;&gt;&gt; from grammdb.exceptions import constraint_error, UniqueConstraintError</span>
+</span><span id="constraint_error-54"><a href="#constraint_error-54"><span class="linenos">54</span></a><span class="sd">        &gt;&gt;&gt; def generate_xkcd_random_number():</span>
+</span><span id="constraint_error-55"><a href="#constraint_error-55"><span class="linenos">55</span></a><span class="sd">        ...     # Chosen by fair dice roll.</span>
+</span><span id="constraint_error-56"><a href="#constraint_error-56"><span class="linenos">56</span></a><span class="sd">        ...     # Guaranteed to be random.</span>
+</span><span id="constraint_error-57"><a href="#constraint_error-57"><span class="linenos">57</span></a><span class="sd">        ...     return 4</span>
+</span><span id="constraint_error-58"><a href="#constraint_error-58"><span class="linenos">58</span></a><span class="sd">        &gt;&gt;&gt; async def try_insert(rand_num):</span>
+</span><span id="constraint_error-59"><a href="#constraint_error-59"><span class="linenos">59</span></a><span class="sd">        ...     try:</span>
+</span><span id="constraint_error-60"><a href="#constraint_error-60"><span class="linenos">60</span></a><span class="sd">        ...         async with grammdb.connection_ctx(database()) as conn:</span>
+</span><span id="constraint_error-61"><a href="#constraint_error-61"><span class="linenos">61</span></a><span class="sd">        ...             with constraint_error():</span>
+</span><span id="constraint_error-62"><a href="#constraint_error-62"><span class="linenos">62</span></a><span class="sd">        ...                 await conn.execute(grammdb.insert(into=schema.MyTable, num=rand_num))</span>
+</span><span id="constraint_error-63"><a href="#constraint_error-63"><span class="linenos">63</span></a><span class="sd">        ...                 await conn.commit()</span>
+</span><span id="constraint_error-64"><a href="#constraint_error-64"><span class="linenos">64</span></a><span class="sd">        ...     except UniqueConstraintError:</span>
+</span><span id="constraint_error-65"><a href="#constraint_error-65"><span class="linenos">65</span></a><span class="sd">        ...         print(&quot;Random number collision encountered. Trying a new random number...&quot;)</span>
+</span><span id="constraint_error-66"><a href="#constraint_error-66"><span class="linenos">66</span></a><span class="sd">        ...         await try_insert(generate_xkcd_random_number())</span>
+</span><span id="constraint_error-67"><a href="#constraint_error-67"><span class="linenos">67</span></a><span class="sd">        ...     except Exception as e:</span>
+</span><span id="constraint_error-68"><a href="#constraint_error-68"><span class="linenos">68</span></a><span class="sd">        ...         print(f&quot;Unknown error occurred: {e}&quot;)</span>
+</span><span id="constraint_error-69"><a href="#constraint_error-69"><span class="linenos">69</span></a><span class="sd">        &gt;&gt;&gt; async def ex():</span>
+</span><span id="constraint_error-70"><a href="#constraint_error-70"><span class="linenos">70</span></a><span class="sd">        ...     await grammdb.init_db(database(), &quot;sqlite+aiosqlite://&quot;)</span>
+</span><span id="constraint_error-71"><a href="#constraint_error-71"><span class="linenos">71</span></a><span class="sd">        ...     await try_insert(generate_xkcd_random_number())</span>
+</span><span id="constraint_error-72"><a href="#constraint_error-72"><span class="linenos">72</span></a><span class="sd">        &gt;&gt;&gt; asyncio.run(ex())</span>
+</span><span id="constraint_error-73"><a href="#constraint_error-73"><span class="linenos">73</span></a>
+</span><span id="constraint_error-74"><a href="#constraint_error-74"><span class="linenos">74</span></a><span class="sd">        ```</span>
+</span><span id="constraint_error-75"><a href="#constraint_error-75"><span class="linenos">75</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="constraint_error-76"><a href="#constraint_error-76"><span class="linenos">76</span></a>
+</span><span id="constraint_error-77"><a href="#constraint_error-77"><span class="linenos">77</span></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="constraint_error-78"><a href="#constraint_error-78"><span class="linenos">78</span></a>        <span class="k">yield</span> <span class="kc">None</span>
+</span><span id="constraint_error-79"><a href="#constraint_error-79"><span class="linenos">79</span></a>    <span class="k">except</span> <span class="n">IntegrityError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="constraint_error-80"><a href="#constraint_error-80"><span class="linenos">80</span></a>        <span class="n">err_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</span><span id="constraint_error-81"><a href="#constraint_error-81"><span class="linenos">81</span></a>        <span class="n">comp_str</span> <span class="o">=</span> <span class="n">err_str</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</span><span id="constraint_error-82"><a href="#constraint_error-82"><span class="linenos">82</span></a>        <span class="k">if</span> <span class="s2">&quot;unique constraint&quot;</span> <span class="ow">in</span> <span class="n">comp_str</span><span class="p">:</span>
+</span><span id="constraint_error-83"><a href="#constraint_error-83"><span class="linenos">83</span></a>            <span class="k">raise</span> <span class="n">UniqueConstraintError</span><span class="p">(</span><span class="n">err_str</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+</span><span id="constraint_error-84"><a href="#constraint_error-84"><span class="linenos">84</span></a>        <span class="k">elif</span> <span class="s2">&quot;check constraint&quot;</span> <span class="ow">in</span> <span class="n">comp_str</span><span class="p">:</span>
+</span><span id="constraint_error-85"><a href="#constraint_error-85"><span class="linenos">85</span></a>            <span class="k">raise</span> <span class="n">CheckConstraintError</span><span class="p">(</span><span class="n">err_str</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+</span><span id="constraint_error-86"><a href="#constraint_error-86"><span class="linenos">86</span></a>        <span class="k">elif</span> <span class="s2">&quot;foreign key constraint&quot;</span> <span class="ow">in</span> <span class="n">comp_str</span><span class="p">:</span>
+</span><span id="constraint_error-87"><a href="#constraint_error-87"><span class="linenos">87</span></a>            <span class="k">raise</span> <span class="n">ForeignKeyConstraintError</span><span class="p">(</span><span class="n">err_str</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+</span><span id="constraint_error-88"><a href="#constraint_error-88"><span class="linenos">88</span></a>        <span class="k">elif</span> <span class="s2">&quot;not null constraint&quot;</span> <span class="ow">in</span> <span class="n">comp_str</span> <span class="ow">or</span> <span class="s2">&quot;not-null constraint&quot;</span> <span class="ow">in</span> <span class="n">comp_str</span><span class="p">:</span>
+</span><span id="constraint_error-89"><a href="#constraint_error-89"><span class="linenos">89</span></a>            <span class="k">raise</span> <span class="n">NotNullConstraintError</span><span class="p">(</span><span class="n">err_str</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+</span><span id="constraint_error-90"><a href="#constraint_error-90"><span class="linenos">90</span></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="constraint_error-91"><a href="#constraint_error-91"><span class="linenos">91</span></a>            <span class="k">raise</span> <span class="n">e</span>
 </span></pre></div>
 
 
-            <div class="docstring"><p>Context manager that will catch and parse a sqlalchemy.exc.IntegrityError
+            <div class="docstring"><p>Context manager that will catch and parse a <code>sqlalchemy.exc.IntegrityError</code>
 and raise one of the specific constraint errors from this module in its place.</p>
+
+<p>SQLAlchemy raises <code>IntegrityError</code> on any constraint violation, but sometimes it's
+helpful to know exactly which constraint was violated in application code and handle
+only that specific error.</p>
 
 <h6 id="note">Note:</h6>
 
