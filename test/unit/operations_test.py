@@ -14,6 +14,18 @@ async def test_insert(fixt_schema, fixt_db):
         assert res.col == "test_value"
 
 
+async def test_insert_many(fixt_schema, fixt_db):
+    async with grammdb.connection_ctx(fixt_db()) as conn:
+        sut = grammdb.insert_many(
+            into=fixt_schema.Table1, values=[{"col": "test_value1"}, {"col": "test_value2"}]
+        )
+        await conn.execute(sut)
+        with does_not_raise():
+            res = (await conn.execute(sa.select(fixt_schema.Table1))).all()
+        assert res[0].col == "test_value1"
+        assert res[1].col == "test_value2"
+
+
 async def test_select_star(fixt_schema, fixt_db, fixt_from):
     async with grammdb.connection_ctx(fixt_db()) as conn:
         await conn.execute(sa.insert(fixt_schema.Table1).values(col="test_value"))
