@@ -8,6 +8,7 @@ __all__ = [
     "exceptions",
     "init_db",
     "insert",
+    "insert_many",
     "rollback_transaction",
     "select",
     "start_transaction",
@@ -27,6 +28,7 @@ from .database import (
 from .operations import (
     delete,
     insert,
+    insert_many,
     select,
     update,
 )

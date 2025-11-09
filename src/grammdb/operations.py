@@ -84,3 +84,12 @@ def insert(*, into: sa.Table, **values: Any) -> sa.Insert:
     """
 
     return sa.insert(into).values(**values)
+
+
+def insert_many(*, into: sa.Table, values: list[dict[str, Any]]) -> sa.Insert:
+    """Wrapper for generating sqlalchemy bulk insert statements with a more sql-like DSL.
+
+    The `into` argument is enforced as keyword-only to make the statements read more like sql.
+    """
+
+    return sa.insert(into).values(values)
